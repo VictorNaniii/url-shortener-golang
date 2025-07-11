@@ -7,4 +7,5 @@ type URLService interface {
 	ShortenForUser(originalURL string, userID uint) (string, error)
 	Redirect(shortURL string) (string, error)
 	GetURLsByUser(userID uint) ([]model.URL, error)
+	GetStats(shortURL string) (*model.URL, error)
 }

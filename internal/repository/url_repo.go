@@ -33,3 +33,7 @@ func (r *urlRepository) GetURLsByUser(userID uint) ([]model.URL, error) {
 	}
 	return urls, nil
 }
+
+func (r *urlRepository) Update(url *model.URL) error {
+	return r.db.Save(url).Error
+}

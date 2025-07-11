@@ -51,6 +51,7 @@ func main() {
 	}))
 	r.Post("/shorten", urlHandler.ShortenURL)
 	r.Get("/{shortURL}", urlHandler.RedirectURL)
+	r.Get("/stats/{shortURL}", urlHandler.StatsURL)
 
 	r.Post("/register", userHandler.Register)
 	r.Post("/login", userHandler.Login)

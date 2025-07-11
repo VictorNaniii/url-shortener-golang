@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"net/http"
+	"time"
 	"url-shortener/internal/domain"
 	"url-shortener/internal/middleware"
 	"url-shortener/internal/service"
@@ -48,6 +49,30 @@ func (h *URLHandler) RedirectURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, originalURL, http.StatusFound)
+}
+
+func (h *URLHandler) StatsURL(w http.ResponseWriter, r *http.Request) {
+	shortURL := chi.URLParam(r, "shortURL")
+	urlObj, err := h.service.GetStats(shortURL)
+	if err != nil {
+		http.Error(w, "Statistics not found", http.StatusNotFound)
+		return
+	}
+	res := struct {
+		ShortURL      string     `json:"short_url"`
+		OriginalURL   string     `json:"original_url"`
+		ClickCount    uint64     `json:"click_count"`
+		LastClickedAt *time.Time `json:"last_clicked_at"`
+	}{
+		ShortURL:      urlObj.ShortenedURL,
+		OriginalURL:   urlObj.OriginalURL,
+		ClickCount:    urlObj.ClickCount,
+		LastClickedAt: urlObj.LastClickedAt,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		http.Error(w, "Failed to write response", http.StatusInternalServerError)
+	}
 }
 
 // Add UserHandler for registration, login, and user URLs

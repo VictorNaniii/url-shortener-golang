@@ -30,11 +30,16 @@ func (s *urlService) Shorten(originalURL string) (string, error) {
 }
 
 func (s *urlService) Redirect(shortURL string) (string, error) {
-	url, err := s.repo.FindByShortURL(shortURL)
+	urlObj, err := s.repo.FindByShortURL(shortURL)
 	if err != nil {
 		return "", err
 	}
-	return url.OriginalURL, nil
+	// update click statistics
+	urlObj.ClickCount++
+	now := time.Now()
+	urlObj.LastClickedAt = &now
+	_ = s.repo.Update(urlObj)
+	return urlObj.OriginalURL, nil
 }
 
 func (s *urlService) ShortenForUser(originalURL string, userID uint) (string, error) {
@@ -53,6 +58,10 @@ func (s *urlService) ShortenForUser(originalURL string, userID uint) (string, er
 
 func (s *urlService) GetURLsByUser(userID uint) ([]model.URL, error) {
 	return s.repo.GetURLsByUser(userID)
+}
+
+func (s *urlService) GetStats(shortURL string) (*model.URL, error) {
+	return s.repo.FindByShortURL(shortURL)
 }
 
 func (s *urlService) generateShortURL(originalURL string) string {
