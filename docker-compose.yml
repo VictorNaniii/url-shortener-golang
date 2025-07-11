@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  url-shortener:
+    build: .
+    ports:
+      - "8080:8080"
+#    environment:
+      #  environment variables here, e.g.:
+      # - CONFIG_PATH=config/config.yaml
+    volumes:
+      - ./config:/app/config
+    restart: unless-stopped
+
