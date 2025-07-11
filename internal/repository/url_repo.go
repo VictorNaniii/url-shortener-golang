@@ -25,3 +25,11 @@ func (r *urlRepository) FindByShortURL(shortURL string) (*model.URL, error) {
 	}
 	return &url, nil
 }
+
+func (r *urlRepository) GetURLsByUser(userID uint) ([]model.URL, error) {
+	var urls []model.URL
+	if err := r.db.Where("user_id = ?", userID).Find(&urls).Error; err != nil {
+		return nil, err
+	}
+	return urls, nil
+}

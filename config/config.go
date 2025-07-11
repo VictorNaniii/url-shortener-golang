@@ -16,7 +16,7 @@ func ConfigDB(localhost, dbUser, dbPassword, dbName, dbPort string) (*gorm.DB, e
 		log.Fatal("Can't connect to the database")
 	}
 
-	if err := db.AutoMigrate(&model.URL{}); err != nil {
+	if err := db.AutoMigrate(&model.User{}, &model.URL{}); err != nil {
 		log.Fatal("failed to migrate database:", err)
 	}
 

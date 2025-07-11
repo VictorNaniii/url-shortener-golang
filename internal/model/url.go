@@ -11,6 +11,7 @@ type URL struct {
 	ShortenedURL string    `gorm:"uniqueIndex;not null" json:"shortened_url"` // Shortened URL
 	OriginalURL  string    `gorm:"not null" json:"original_url"`              // Original URL
 	CreatedAt    time.Time `gorm:"autoCreateTime" json:"created_at"`          // Timestamp of creation
+	UserID       uint      `gorm:"index" json:"user_id"`                      // User association
 }
 
 // TableName overrides the default table name for URL.

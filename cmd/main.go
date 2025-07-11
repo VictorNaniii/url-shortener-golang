@@ -10,6 +10,7 @@ import (
 	"os"
 	"url-shortener/config"
 	"url-shortener/internal/api"
+	"url-shortener/internal/middleware"
 	"url-shortener/internal/repository"
 	"url-shortener/internal/service"
 )
@@ -35,6 +36,10 @@ func main() {
 	urlService := service.NewURLService(urlRepo)
 	urlHandler := api.NewURLHandler(urlService)
 
+	userRepo := repository.NewUserRepository(db)
+	userService := service.NewUserService(userRepo)
+	userHandler := api.NewUserHandler(userService, urlService)
+
 	r := chi.NewRouter()
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"*"}, // allow all origins
@@ -47,6 +52,12 @@ func main() {
 	r.Post("/shorten", urlHandler.ShortenURL)
 	r.Get("/{shortURL}", urlHandler.RedirectURL)
 
+	r.Post("/register", userHandler.Register)
+	r.Post("/login", userHandler.Login)
+	r.With(middleware.AuthMiddleware).Get("/user/urls", userHandler.GetUserURLs)
+
 	fmt.Println("Server is running on port 8080")
-	http.ListenAndServe(":8080", r)
+	if err := http.ListenAndServe(":8080", r); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
+	}
 }

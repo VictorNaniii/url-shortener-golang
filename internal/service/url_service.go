@@ -37,6 +37,24 @@ func (s *urlService) Redirect(shortURL string) (string, error) {
 	return url.OriginalURL, nil
 }
 
+func (s *urlService) ShortenForUser(originalURL string, userID uint) (string, error) {
+	shortURL := s.generateShortURL(originalURL)
+	url := &model.URL{
+		OriginalURL:  originalURL,
+		ShortenedURL: shortURL,
+		CreatedAt:    time.Now(),
+		UserID:       userID,
+	}
+	if err := s.repo.Save(url); err != nil {
+		return "", err
+	}
+	return shortURL, nil
+}
+
+func (s *urlService) GetURLsByUser(userID uint) ([]model.URL, error) {
+	return s.repo.GetURLsByUser(userID)
+}
+
 func (s *urlService) generateShortURL(originalURL string) string {
 	hasher := sha1.New()
 	hasher.Write([]byte(originalURL))
