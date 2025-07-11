@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 	"log"
 	"net/http"
@@ -35,6 +36,14 @@ func main() {
 	urlHandler := api.NewURLHandler(urlService)
 
 	r := chi.NewRouter()
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"}, // allow all origins
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"}, // allow all headers
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300, // preflight cache duration
+	}))
 	r.Post("/shorten", urlHandler.ShortenURL)
 	r.Get("/{shortURL}", urlHandler.RedirectURL)
 
