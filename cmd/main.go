@@ -1,3 +1,8 @@
+// @title URL Shortener API
+// @version 1.0
+// @description Shorten URLs and view analytics
+// @host localhost:8080
+// @BasePath /
 package main
 
 import (
@@ -5,10 +10,12 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"log"
 	"net/http"
 	"os"
 	"url-shortener/config"
+	"url-shortener/docs"
 	"url-shortener/internal/api"
 	"url-shortener/internal/middleware"
 	"url-shortener/internal/repository"
@@ -20,6 +27,9 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+	// Swagger info
+	docs.SwaggerInfo.Host = "localhost:8080"
+	docs.SwaggerInfo.BasePath = "/"
 
 	localhost := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
@@ -41,6 +51,7 @@ func main() {
 	userHandler := api.NewUserHandler(userService, urlService)
 
 	r := chi.NewRouter()
+	// Register middleware before routes
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"*"}, // allow all origins
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -49,6 +60,8 @@ func main() {
 		AllowCredentials: false,
 		MaxAge:           300, // preflight cache duration
 	}))
+	// Swagger UI
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
 	r.Post("/shorten", urlHandler.ShortenURL)
 	r.Get("/{shortURL}", urlHandler.RedirectURL)
 	r.Get("/stats/{shortURL}", urlHandler.StatsURL)

@@ -35,13 +35,16 @@ func (s *UserService) Register(username, password string) (model.User, error) {
 func (s *UserService) Login(username, password string) (string, error) {
 	user, err := s.repo.GetUserByUsername(username)
 	if err != nil {
+		if err.Error() == "user not found" {
+			return "", errors.New("invalid credentials")
+		}
 		return "", err
 	}
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) != nil {
 		return "", errors.New("invalid credentials")
 	}
 	claims := jwt.MapClaims{
-		"user_id": user.ID,
+		"user_id": float64(user.ID), // Ensure consistent type
 		"exp":     time.Now().Add(24 * time.Hour).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

@@ -37,3 +37,11 @@ func (r *urlRepository) GetURLsByUser(userID uint) ([]model.URL, error) {
 func (r *urlRepository) Update(url *model.URL) error {
 	return r.db.Save(url).Error
 }
+
+func (r *urlRepository) FindByCustomAlias(alias string) (*model.URL, error) {
+	var url model.URL
+	if err := r.db.Where("custom_alias = ?", alias).First(&url).Error; err != nil {
+		return nil, err
+	}
+	return &url, nil
+}
